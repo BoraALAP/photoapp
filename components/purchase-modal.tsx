@@ -19,19 +19,19 @@ const PRICING_OPTIONS = [
   {
     id: "gen_1",
     label: "1 Generation",
-    price: "$5",
+    price: "$2.99",
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_1,
   },
   {
     id: "gen_5",
     label: "5 Generation",
-    price: "$20",
+    price: "$12.99",
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_5,
   },
   {
     id: "gen_10",
     label: "10 Generation",
-    price: "$35",
+    price: "$19.99",
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_10,
   },
 ];
@@ -104,11 +104,10 @@ export function PurchaseModal({ onClose, onPurchaseComplete }: PurchaseModalProp
             <button
               key={option.id}
               onClick={() => setSelectedOption(option.id)}
-              className={`border rounded-2xl p-4 flex items-center gap-4 transition-colors ${
-                selectedOption === option.id
+              className={`border rounded-2xl p-4 flex items-center gap-4 transition-colors ${selectedOption === option.id
                   ? "bg-red-50 border-red-200"
                   : "bg-white border-gray-300 hover:border-gray-400"
-              }`}
+                }`}
             >
               {/* Radio Button */}
               <div className="w-6 h-6 rounded-full border-2 border-gray-800 flex items-center justify-center shrink-0">
