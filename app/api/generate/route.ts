@@ -8,6 +8,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getOrCreateStripeCustomer, decrementCredit } from "@/lib/stripe";
 import { generateImages } from "@/lib/nb-gemini";
 import { getPreset } from "@/lib/presets";
+import { watermarkAndDownscale } from "@/lib/watermark";
 import crypto from "crypto";
 import { readFile } from "fs/promises";
 import path from "path";
@@ -52,6 +53,11 @@ export async function POST(req: NextRequest) {
 
     // Get or create Stripe customer
     const customer = await getOrCreateStripeCustomer(email);
+
+    // Check if this is a free generation (first one)
+    const { getCustomerCredits } = await import("@/lib/stripe");
+    const creditInfo = await getCustomerCredits(customer.id);
+    const isFreeGeneration = creditInfo.total_gens === 0;
 
     // Convert photo to base64
     const photoBuffer = Buffer.from(await photoFile.arrayBuffer());
@@ -107,10 +113,18 @@ export async function POST(req: NextRequest) {
       quality: "high",
     });
 
+    // Watermark all generated images
+    // Free users: watermark + downscale to 768px
+    // Paid users: watermark only, full size
+    const watermarkedImages = await Promise.all(
+      result.images.map((img) => watermarkAndDownscale(img, isFreeGeneration))
+    );
+
     return NextResponse.json({
       success: true,
-      images: result.images,
+      images: watermarkedImages,
       metadata: result.metadata,
+      isFreeGeneration,
     });
   } catch (error) {
     console.error("Error generating images:", error);

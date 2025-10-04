@@ -8,11 +8,12 @@ import path from "path";
 import fs from "fs";
 
 /**
- * Downscale image to max 768px and add logo watermark to bottom right corner.
+ * Add logo watermark to bottom right corner, optionally downscale to max 768px.
  * Returns base64 encoded watermarked image.
  */
 export async function watermarkAndDownscale(
-  imageBase64: string
+  imageBase64: string,
+  shouldDownscale: boolean = true
 ): Promise<string> {
   try {
     // Extract base64 data from data URI
@@ -24,11 +25,11 @@ export async function watermarkAndDownscale(
     const originalWidth = metadata.width || 1024;
     const originalHeight = metadata.height || 1024;
 
-    // Calculate new dimensions (max 768px, maintain aspect ratio)
+    // Calculate new dimensions (max 768px if downscaling, maintain aspect ratio)
     let newWidth = originalWidth;
     let newHeight = originalHeight;
 
-    if (originalWidth > 768 || originalHeight > 768) {
+    if (shouldDownscale && (originalWidth > 768 || originalHeight > 768)) {
       if (originalWidth > originalHeight) {
         newWidth = 768;
         newHeight = Math.round((originalHeight / originalWidth) * 768);
@@ -46,20 +47,12 @@ export async function watermarkAndDownscale(
     const logoWidth = Math.min(Math.floor(newWidth * 0.08), 120);
     const padding = Math.floor(logoWidth * 0.2); // 20% of logo width for padding
 
-    // Resize logo and add semi-transparency
+    // Resize logo
     const resizedLogo = await sharp(logoBuffer)
       .resize(logoWidth, null, {
         fit: "inside",
         withoutEnlargement: true,
       })
-      .composite([
-        {
-          input: Buffer.from(
-            `<svg><rect x="0" y="0" width="100%" height="100%" fill="white" fill-opacity="0"/></svg>`
-          ),
-          blend: "dest-in",
-        },
-      ])
       .toBuffer();
 
     const logoMetadata = await sharp(resizedLogo).metadata();
