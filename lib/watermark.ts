@@ -1,12 +1,14 @@
 /**
  * Image watermarking and downscaling utilities for preview mode.
- * Uses sharp for image processing with watermark in bottom right corner.
+ * Uses sharp for image processing with logo watermark in bottom right corner.
  */
 
 import sharp from "sharp";
+import path from "path";
+import fs from "fs";
 
 /**
- * Downscale image to max 768px and add watermark to bottom right corner.
+ * Downscale image to max 768px and add logo watermark to bottom right corner.
  * Returns base64 encoded watermarked image.
  */
 export async function watermarkAndDownscale(
@@ -36,30 +38,34 @@ export async function watermarkAndDownscale(
       }
     }
 
-    // Create watermark text SVG (bottom right corner)
-    const timestamp = new Date().toLocaleDateString();
-    const watermarkText = `PhotoApp Preview • ${timestamp}`;
+    // Load and resize logo for watermark (bottom right corner)
+    const logoPath = path.join(process.cwd(), "public", "logo.webp");
+    const logoBuffer = fs.readFileSync(logoPath);
 
-    // Calculate watermark position (bottom right with padding)
-    const fontSize = Math.max(12, Math.floor(newWidth / 50));
-    const padding = Math.floor(fontSize);
+    // Calculate logo size (8% of image width, max 120px)
+    const logoWidth = Math.min(Math.floor(newWidth * 0.08), 120);
+    const padding = Math.floor(logoWidth * 0.2); // 20% of logo width for padding
 
-    const watermarkSvg = `
-      <svg width="${newWidth}" height="${newHeight}">
-        <text
-          x="${newWidth - padding}"
-          y="${newHeight - padding}"
-          font-family="Arial, sans-serif"
-          font-size="${fontSize}"
-          fill="white"
-          fill-opacity="0.7"
-          text-anchor="end"
-          dominant-baseline="baseline"
-        >${watermarkText}</text>
-      </svg>
-    `;
+    // Resize logo and add semi-transparency
+    const resizedLogo = await sharp(logoBuffer)
+      .resize(logoWidth, null, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .composite([
+        {
+          input: Buffer.from(
+            `<svg><rect x="0" y="0" width="100%" height="100%" fill="white" fill-opacity="0"/></svg>`
+          ),
+          blend: "dest-in",
+        },
+      ])
+      .toBuffer();
 
-    // Process image: resize and add watermark
+    const logoMetadata = await sharp(resizedLogo).metadata();
+    const logoHeight = logoMetadata.height || logoWidth;
+
+    // Process image: resize and add logo watermark
     const processedBuffer = await sharp(imageBuffer)
       .resize(newWidth, newHeight, {
         fit: "inside",
@@ -67,9 +73,10 @@ export async function watermarkAndDownscale(
       })
       .composite([
         {
-          input: Buffer.from(watermarkSvg),
-          top: 0,
-          left: 0,
+          input: resizedLogo,
+          top: newHeight - logoHeight - padding,
+          left: newWidth - logoWidth - padding,
+          blend: "over",
         },
       ])
       .png()
