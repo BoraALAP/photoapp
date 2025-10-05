@@ -17,6 +17,7 @@ export default function Home() {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [results, setResults] = useState<string[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
   const [totalGens, setTotalGens] = useState<number>(0);
@@ -123,6 +124,7 @@ export default function Home() {
     }
 
     setGenerating(true);
+    setError(null);
 
     try {
       const formData = new FormData();
@@ -136,12 +138,13 @@ export default function Home() {
       });
 
       if (!res.ok) {
-        const error = await res.json();
-        console.error("Generation error:", error);
+        const errorData = await res.json();
+        console.error("Generation error:", errorData);
         if (res.status === 402) {
           setShowPurchaseModal(true);
+          setGenerating(false);
         } else {
-          alert(`Generation failed: ${error.error || "Unknown error"}`);
+          setError(errorData.error || "Generation failed");
         }
         return;
       }
@@ -152,9 +155,9 @@ export default function Home() {
 
       // Refresh credits after successful generation
       await fetchCredits();
-    } catch (error) {
-      console.error("Error generating images:", error);
-      alert("Failed to generate images");
+    } catch (err) {
+      console.error("Error generating images:", err);
+      setError("Failed to generate images");
     } finally {
       setGenerating(false);
     }
@@ -190,12 +193,14 @@ export default function Home() {
     }
   };
 
-  // Show results page if we have results
-  if (results) {
+  // Show results/loading page if we have results or generating
+  if (results || generating || error) {
     return (
       <ResultsPage
         images={results}
         onBack={handleBackToCapture}
+        generating={generating}
+        error={error}
       />
     );
   }

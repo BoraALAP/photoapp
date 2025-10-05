@@ -2,6 +2,7 @@
  * ResultsPage Component
  *
  * Displays the 4 generated AI images in a grid layout with download buttons.
+ * Shows skeleton loaders during generation and error states.
  * Each image has a download button overlay in the bottom right corner.
  */
 
@@ -10,37 +11,42 @@
 import { Logo } from "@/components/logo";
 import { Download } from "lucide-react";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ResultsPageProps {
-  images: string[];
+  images: string[] | null;
   onBack: () => void;
+  generating?: boolean;
+  error?: string | null;
 }
 
-export function ResultsPage({ images, onBack }: ResultsPageProps) {
+export function ResultsPage({ images, onBack, generating = false, error = null }: ResultsPageProps) {
   const handleDownload = async (imageUrl: string, index: number) => {
     try {
+      const fileName = `generated-image-${index + 1}.png`;
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      // Convert base64 to blob
       const response = await fetch(imageUrl);
       const blob = await response.blob();
-      const fileName = `generated-image-${index + 1}.png`;
 
-      // Check if Web Share API is available (mobile devices)
-      if (navigator.share && navigator.canShare) {
+      if (isMobile && navigator.share) {
+        // Use Web Share API for mobile - works on iOS Safari and modern Android
         const file = new File([blob], fileName, { type: blob.type });
-        if (navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: "Generated Image",
-            });
-            return;
-          } catch (shareError) {
-            // User cancelled share or share failed, fall back to download
-            console.log("Share cancelled or failed:", shareError);
+        try {
+          await navigator.share({
+            files: [file],
+          });
+          return;
+        } catch (shareError: any) {
+          // User cancelled or share not supported, fall through to download
+          if (shareError.name !== 'AbortError') {
+            console.log('Share failed:', shareError);
           }
         }
       }
 
-      // Fallback: Standard download for desktop or if share fails
+      // Standard download for desktop or if share fails
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -56,39 +62,70 @@ export function ResultsPage({ images, onBack }: ResultsPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0a0a] flex flex-col items-center pb-8 pt-4 px-4">
-      {/* Logo */}
-      <div className="mb-6">
-        <Logo size={72} />
-      </div>
+    <div className="min-h-screen h-screen bg-[#0f0a0a] flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 flex flex-col items-center">
+        {/* Logo */}
+        <div className="mb-6">
+          <Logo size={72} />
+        </div>
 
-      {/* Grid of Images */}
-      <div className="grid md:grid-cols-2  w-full  gap-2 mb-20">
-        {images.map((imageUrl, index) => (
-          <div
-            key={index}
-            className="relative aspect-video rounded-3xl overflow-hidden bg-black"
-          >
-            <Image
-              src={imageUrl}
-              alt={`Generated image ${index + 1}`}
-              fill
-              className="object-cover"
-            />
-
-            {/* Download Button */}
-            <button
-              onClick={() => handleDownload(imageUrl, index)}
-              className="absolute bottom-6 right-6 w-10 h-10 bg-white rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
-            >
-              <Download className="w-6 h-6 text-black" />
-            </button>
+        {/* Status Message */}
+        {(generating || error) && (
+          <div className="w-full text-center mb-4">
+            {generating && (
+              <p className="text-white text-lg font-medium">Generating...</p>
+            )}
+            {error && (
+              <p className="text-red-400 text-lg font-medium">{error}</p>
+            )}
           </div>
-        ))}
+        )}
+
+        {/* Grid of Images or Skeletons */}
+        <div className="grid md:grid-cols-2 w-full gap-2 mb-4">
+          {generating || error ? (
+            // Show 4 skeleton loaders
+            Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="relative aspect-video rounded-3xl overflow-hidden bg-[#2a2a2a]"
+              >
+                <Skeleton className="w-full h-full bg-[#3a3a3a]" />
+                {/* Download Icon Placeholder */}
+                <div className="absolute bottom-6 right-6 w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Download className="w-6 h-6 text-white/40" />
+                </div>
+              </div>
+            ))
+          ) : (
+            // Show actual images
+            images?.map((imageUrl, index) => (
+              <div
+                key={index}
+                className="relative aspect-video rounded-3xl overflow-hidden bg-black"
+              >
+                <Image
+                  src={imageUrl}
+                  alt={`Generated image ${index + 1}`}
+                  fill
+                  className="object-cover"
+                />
+
+                {/* Download Button */}
+                <button
+                  onClick={() => handleDownload(imageUrl, index)}
+                  className="absolute bottom-6 right-6 w-10 h-10 bg-white rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
+                >
+                  <Download className="w-6 h-6 text-black" />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Back Button */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
         <button
           onClick={onBack}
           className="bg-white text-black px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-colors min-w-[272px]"
