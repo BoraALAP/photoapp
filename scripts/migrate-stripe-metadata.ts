@@ -15,12 +15,12 @@
 
 import Stripe from "stripe";
 
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
-
-if (!STRIPE_SECRET_KEY) {
+if (!process.env.STRIPE_SECRET_KEY) {
   console.error("❌ Error: STRIPE_SECRET_KEY environment variable is required");
   process.exit(1);
 }
+
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
   apiVersion: "2025-09-30.clover",
