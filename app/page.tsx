@@ -10,7 +10,7 @@ import { LogIn } from "lucide-react";
 import Image from "next/image";
 
 export default function Home() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string>("toronto");
@@ -87,7 +87,9 @@ export default function Home() {
 
     const ctx = canvas.getContext("2d");
     if (ctx) {
-      ctx.drawImage(video, 0, 0);
+      // Flip the canvas horizontally to match the mirrored video display
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, -canvas.width, 0);
       canvas.toBlob(async (blob) => {
         if (blob) {
           const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
@@ -110,6 +112,16 @@ export default function Home() {
   const handleGenerateWithFile = async (file: File) => {
     if (!file || !selectedPreset) return;
 
+    // Require sign-in for generation
+    if (!isSignedIn) {
+      // Trigger sign-in modal
+      const signInButton = document.querySelector('[data-clerk-sign-in]') as HTMLButtonElement;
+      if (signInButton) {
+        signInButton.click();
+      }
+      return;
+    }
+
     setGenerating(true);
 
     try {
@@ -117,7 +129,7 @@ export default function Home() {
       formData.append("photo", file);
       formData.append("presetId", selectedPreset);
 
-      const endpoint = isSignedIn ? "/api/generate" : "/api/preview";
+      const endpoint = "/api/generate";
       const res = await fetch(endpoint, {
         method: "POST",
         body: formData,
@@ -209,7 +221,7 @@ export default function Home() {
               autoPlay
               playsInline
               muted
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover scale-x-[-1]"
             />
             <canvas ref={canvasRef} className="hidden" />
           </>

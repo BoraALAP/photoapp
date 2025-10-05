@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { stripe, incrementCredits } from "@/lib/stripe";
+import { getPricingByPriceId } from "@/lib/pricing";
 import Stripe from "stripe";
 
 console.log("✅ Stripe webhook route loaded");
@@ -84,18 +85,15 @@ export async function POST(req: NextRequest) {
 
         console.log("Processing line item:", { priceId, quantity });
 
-        // Map price IDs to credit amounts
-        if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_1) {
-          totalCredits += 1 * quantity;
-          console.log("Matched GEN_1 price");
-        } else if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_5) {
-          totalCredits += 5 * quantity;
-          console.log("Matched GEN_5 price");
-        } else if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_10) {
-          totalCredits += 10 * quantity;
-          console.log("Matched GEN_10 price");
-        } else {
-          console.log("No price match found for:", priceId);
+        // Get pricing option from centralized config
+        if (priceId) {
+          const pricingOption = getPricingByPriceId(priceId);
+          if (pricingOption) {
+            totalCredits += pricingOption.credits * quantity;
+            console.log(`Matched ${pricingOption.label}: ${pricingOption.credits} credits`);
+          } else {
+            console.log("No price match found for:", priceId);
+          }
         }
       }
 

@@ -9,32 +9,12 @@
 
 import { useState } from "react";
 import { Logo } from "@/components/logo";
+import { PRICING_OPTIONS } from "@/lib/pricing";
 
 interface PurchaseModalProps {
   onClose: () => void;
   onPurchaseComplete: () => void;
 }
-
-const PRICING_OPTIONS = [
-  {
-    id: "gen_1",
-    label: "1 Generation",
-    price: "$2.99",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_1,
-  },
-  {
-    id: "gen_5",
-    label: "5 Generation",
-    price: "$12.99",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_5,
-  },
-  {
-    id: "gen_10",
-    label: "10 Generation",
-    price: "$19.99",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_10,
-  },
-];
 
 export function PurchaseModal({ onClose, onPurchaseComplete }: PurchaseModalProps) {
   const [selectedOption, setSelectedOption] = useState(PRICING_OPTIONS[0].id);
@@ -105,8 +85,8 @@ export function PurchaseModal({ onClose, onPurchaseComplete }: PurchaseModalProp
               key={option.id}
               onClick={() => setSelectedOption(option.id)}
               className={`border rounded-2xl p-4 flex items-center gap-4 transition-colors ${selectedOption === option.id
-                  ? "bg-red-50 border-red-200"
-                  : "bg-white border-gray-300 hover:border-gray-400"
+                ? "bg-red-50 border-red-200"
+                : "bg-white border-gray-300 hover:border-gray-400"
                 }`}
             >
               {/* Radio Button */}
