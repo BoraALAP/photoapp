@@ -21,10 +21,30 @@ export function ResultsPage({ images, onBack }: ResultsPageProps) {
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
+      const fileName = `generated-image-${index + 1}.png`;
+
+      // Check if Web Share API is available (mobile devices)
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], fileName, { type: blob.type });
+        if (navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: "Generated Image",
+            });
+            return;
+          } catch (shareError) {
+            // User cancelled share or share failed, fall back to download
+            console.log("Share cancelled or failed:", shareError);
+          }
+        }
+      }
+
+      // Fallback: Standard download for desktop or if share fails
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `generated-image-${index + 1}.png`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
