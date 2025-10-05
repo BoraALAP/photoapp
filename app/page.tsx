@@ -227,11 +227,12 @@ export default function Home() {
         )}
 
         {/* Logo Overlay */}
-        <div className="absolute top-6  z-10 w-full flex items-center justify-between px-6">
-          <div className="w-20"></div>
-          <Logo size={72} className="drop-shadow-lg" />
-          <div className="  flex items-center gap-3">
+        <div className="absolute top-6 z-10 w-full flex items-center justify-between px-6">
+          <div className="w-10"></div>
 
+          <Logo size={72} className="drop-shadow-lg" />
+
+          <div className="flex items-center gap-3">
             {isSignedIn ? (
               <UserButton
                 appearance={{
@@ -293,11 +294,11 @@ export default function Home() {
       <div className="w-full  flex items-center justify-between px-2">
         {/* Credit Display */}
         {isSignedIn && credits !== null ? (
-          <p className="text-sm text-white font-normal">
+          <p className="text-sm text-white font-normal w-20">
             Credit: {credits}
           </p>
         ) : (
-          <div />
+          <div className="w-20" />
         )}
 
         {/* Camera/Generate Button */}

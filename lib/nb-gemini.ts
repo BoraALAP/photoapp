@@ -39,6 +39,8 @@ export async function generateImages(
 
   const startTime = Date.now();
   const generatedImages: string[] = [];
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
 
   // Extract base64 data from data URI
   const extractBase64 = (dataUri: string): string => {
@@ -83,8 +85,26 @@ export async function generateImages(
 
       const response = result.response;
 
-      // Log the full response for debugging
-      console.log("Full Gemini response:", JSON.stringify(response, null, 2));
+      // Track token usage
+      if (response.usageMetadata) {
+        const inputTokens = response.usageMetadata.promptTokenCount || 0;
+        const outputTokens = response.usageMetadata.candidatesTokenCount || 0;
+        totalInputTokens += inputTokens;
+        totalOutputTokens += outputTokens;
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Image ${generatedImages.length + 1} token usage:`, {
+            inputTokens,
+            outputTokens,
+            totalTokens: inputTokens + outputTokens,
+          });
+        }
+      }
+
+      // Log the full response for debugging in dev mode
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Full Gemini response:", JSON.stringify(response, null, 2));
+      }
 
       // Extract generated image from response
       if (response.candidates && response.candidates[0]?.content?.parts) {
@@ -116,6 +136,18 @@ export async function generateImages(
   }
 
   const processingTime = Date.now() - startTime;
+
+  // Log total token usage in dev mode
+  if (process.env.NODE_ENV === 'development') {
+    console.log("=== Total Generation Summary ===", {
+      totalImages: generatedImages.length,
+      totalInputTokens,
+      totalOutputTokens,
+      totalTokens: totalInputTokens + totalOutputTokens,
+      avgTokensPerImage: Math.round((totalInputTokens + totalOutputTokens) / generatedImages.length),
+      processingTimeMs: processingTime,
+    });
+  }
 
   return {
     images: generatedImages,
