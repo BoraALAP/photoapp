@@ -36,7 +36,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       customerId: customer.id,
-      credits: creditData.credits,
+      free_credits: creditData.free_credits,
+      image_credits: creditData.image_credits,
+      video_credits: creditData.video_credits,
+      total_credits: creditData.free_credits + creditData.image_credits,
       total_gens: creditData.total_gens,
       lastGeneratedAt: creditData.last_gen_at,
       lastPreset: creditData.last_preset,

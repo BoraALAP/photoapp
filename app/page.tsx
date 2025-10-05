@@ -20,6 +20,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
+  const [freeCredits, setFreeCredits] = useState<number>(0);
   const [totalGens, setTotalGens] = useState<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -65,7 +66,8 @@ export default function Home() {
       try {
         const res = await fetch("/api/credits");
         const data = await res.json();
-        setCredits(data.credits);
+        setCredits(data.image_credits); // Show only image credits
+        setFreeCredits(data.free_credits);
         setTotalGens(data.total_gens);
       } catch (err) {
         console.error("Failed to fetch credits:", err);
@@ -274,10 +276,10 @@ export default function Home() {
         </div>
 
         {/* Free Credits Banner */}
-        {isSignedIn && totalGens === 0 && credits !== null && credits > 0 && (
+        {isSignedIn && freeCredits > 0 && (
           <div className="absolute bottom-20 left-0 right-0 flex justify-center px-6">
             <div className="bg-green-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-xs font-medium">
-              🎉 {credits} free credits remaining
+              🎉 {freeCredits} free {freeCredits === 1 ? 'credit' : 'credits'} remaining
             </div>
           </div>
         )}

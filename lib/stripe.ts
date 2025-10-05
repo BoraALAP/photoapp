@@ -14,7 +14,9 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export interface CreditMetadata {
-  credits: number;
+  free_credits: number;
+  image_credits: number;
+  video_credits: number;
   total_gens: number;
   last_gen_at?: string;
   last_preset?: string;
@@ -60,7 +62,9 @@ export async function getOrCreateStripeCustomer(
   return await stripe.customers.create({
     email,
     metadata: {
-      credits: "5",
+      free_credits: "5",
+      image_credits: "0",
+      video_credits: "0",
       total_gens: "0",
     },
   });
@@ -75,11 +79,15 @@ export async function getCustomerCredits(
     throw new Error("Customer has been deleted");
   }
 
-  const credits = parseInt(customer.metadata.credits || "0");
+  const free_credits = parseInt(customer.metadata.free_credits || "0");
+  const image_credits = parseInt(customer.metadata.image_credits || "0");
+  const video_credits = parseInt(customer.metadata.video_credits || "0");
   const total_gens = parseInt(customer.metadata.total_gens || "0");
 
   return {
-    credits,
+    free_credits,
+    image_credits,
+    video_credits,
     total_gens,
     last_gen_at: customer.metadata.last_gen_at,
     last_preset: customer.metadata.last_preset,
@@ -96,11 +104,13 @@ export async function incrementCredits(
 ): Promise<void> {
   await withLock(customerId, async () => {
     const current = await getCustomerCredits(customerId);
-    const newCredits = current.credits + amount;
+    const newImageCredits = current.image_credits + amount;
 
     await stripe.customers.update(customerId, {
       metadata: {
-        credits: newCredits.toString(),
+        free_credits: current.free_credits.toString(),
+        image_credits: newImageCredits.toString(),
+        video_credits: current.video_credits.toString(),
         total_gens: current.total_gens.toString(),
         last_event_id: eventId,
       },
@@ -120,28 +130,44 @@ export async function decrementCredit(
 
     console.log("Credit check:", {
       customerId,
-      currentCredits: current.credits,
+      freeCredits: current.free_credits,
+      imageCredits: current.image_credits,
       totalGens: current.total_gens,
     });
 
-    // Check if user has credits
-    if (current.credits <= 0) {
+    // Check if user has any credits (prioritize free credits)
+    const hasFreeCredits = current.free_credits > 0;
+    const hasImageCredits = current.image_credits > 0;
+
+    if (!hasFreeCredits && !hasImageCredits) {
       console.log("Insufficient credits");
       return false;
     }
 
-    // Decrement credits
-    const newCredits = current.credits - 1;
+    // Decrement credits (prioritize free credits)
+    let newFreeCredits = current.free_credits;
+    let newImageCredits = current.image_credits;
+
+    if (hasFreeCredits) {
+      newFreeCredits -= 1;
+    } else {
+      newImageCredits -= 1;
+    }
+
     const newTotalGens = current.total_gens + 1;
 
     console.log("Updating credits:", {
-      newCredits,
+      newFreeCredits,
+      newImageCredits,
       newTotalGens,
+      usedFreeCredit: hasFreeCredits,
     });
 
     await stripe.customers.update(customerId, {
       metadata: {
-        credits: newCredits.toString(),
+        free_credits: newFreeCredits.toString(),
+        image_credits: newImageCredits.toString(),
+        video_credits: current.video_credits.toString(),
         total_gens: newTotalGens.toString(),
         last_gen_at: new Date().toISOString(),
         last_preset: presetId,
