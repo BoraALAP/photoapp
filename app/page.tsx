@@ -268,11 +268,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Free Credit Banner */}
-        {isSignedIn && totalGens === 0 && (
+        {/* Free Credits Banner */}
+        {isSignedIn && totalGens === 0 && credits !== null && credits > 0 && (
           <div className="absolute bottom-20 left-0 right-0 flex justify-center px-6">
             <div className="bg-green-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-xs font-medium">
-              🎉 Using your free credit
+              🎉 {credits} free credits remaining
             </div>
           </div>
         )}

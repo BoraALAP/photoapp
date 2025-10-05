@@ -56,11 +56,11 @@ export async function getOrCreateStripeCustomer(
     return existing.data[0];
   }
 
-  // Create new customer with 0 credits
+  // Create new customer with 5 free credits
   return await stripe.customers.create({
     email,
     metadata: {
-      credits: "0",
+      credits: "5",
       total_gens: "0",
     },
   });
@@ -118,30 +118,25 @@ export async function decrementCredit(
     // Re-read to ensure atomicity
     const current = await getCustomerCredits(customerId);
 
-    // First generation is free (total_gens === 0)
-    const isFirstGeneration = current.total_gens === 0;
-
     console.log("Credit check:", {
       customerId,
       currentCredits: current.credits,
       totalGens: current.total_gens,
-      isFirstGeneration,
     });
 
-    // Check if user has credits (or if it's their first free generation)
-    if (!isFirstGeneration && current.credits <= 0) {
-      console.log("Insufficient credits - not first generation and no credits");
+    // Check if user has credits
+    if (current.credits <= 0) {
+      console.log("Insufficient credits");
       return false;
     }
 
-    // Only decrement credits if not the first generation
-    const newCredits = isFirstGeneration ? current.credits : current.credits - 1;
+    // Decrement credits
+    const newCredits = current.credits - 1;
     const newTotalGens = current.total_gens + 1;
 
     console.log("Updating credits:", {
       newCredits,
       newTotalGens,
-      wasFree: isFirstGeneration,
     });
 
     await stripe.customers.update(customerId, {
