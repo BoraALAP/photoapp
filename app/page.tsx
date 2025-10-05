@@ -192,11 +192,9 @@ export default function Home() {
 
 
   return (
-    <div className="min-h-screen bg-[#0f0a0a] flex flex-col items-center pb-8 pt-4 px-4 relative">
-      {/* Sign In/Out Button - Top Right */}
-
+    <div className="h-full w-full bg-[#0f0a0a] flex flex-col items-center justify-between p-4 gap-4 overflow-hidden">
       {/* Main Photo Frame */}
-      <div className="flex-1 w-full  rounded-3xl overflow-hidden relative mb-4 bg-black">
+      <div className="flex-1 w-full  rounded-3xl overflow-hidden relative bg-black">
         {photoPreview ? (
           <Image
             src={photoPreview}
@@ -291,21 +289,28 @@ export default function Home() {
         />
       </div>
 
-      {/* Credit Display - Bottom Left */}
-      {isSignedIn && credits !== null && (
-        <p className="absolute bottom-16 left-6 text-sm text-white z-10 font-normal">
-          Credit: {credits}
-        </p>
-      )}
-      {/* Camera/Generate Button */}
+      {/* Bottom Controls */}
+      <div className="w-full  flex items-center justify-between px-2">
+        {/* Credit Display */}
+        {isSignedIn && credits !== null ? (
+          <p className="text-sm text-white font-normal">
+            Credit: {credits}
+          </p>
+        ) : (
+          <div />
+        )}
 
-      <button
-        onClick={photoPreview ? handleGenerate : capturePhoto}
-        disabled={generating || (!stream && !photoPreview)}
-        className="w-16 h-16 rounded-full bg-black border-4 border-white p-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-      >
-        <div className="w-full h-full rounded-full bg-gradient-to-b from-red-900 to-red-600" />
-      </button>
+        {/* Camera/Generate Button */}
+        <button
+          onClick={photoPreview ? handleGenerate : capturePhoto}
+          disabled={generating || (!stream && !photoPreview)}
+          className="w-16 h-16 rounded-full bg-black border-4 border-white p-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shrink-0"
+        >
+          <div className="w-full h-full rounded-full bg-gradient-to-b from-red-900 to-red-600" />
+        </button>
+
+        <div className="w-20" />
+      </div>
 
       {/* Purchase Modal */}
       {showPurchaseModal && (

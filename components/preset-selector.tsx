@@ -28,15 +28,12 @@ export function PresetSelector({
   return (
     <div
       className={cn(
-        "flex gap-4 items-center justify-center px-6 overflow-x-auto",
+        "flex gap-4 items-center  px-6 overflow-x-auto scrollbar-hide ",
         className
       )}
     >
       {presets.map((preset) => {
         const isSelected = preset.id === selectedPreset;
-
-        // Match legacy label from home page when available
-        const label = preset.id === "banff" ? "Lake Louise" : preset.name;
 
         return (
           <button
@@ -48,11 +45,11 @@ export function PresetSelector({
               BUTTON_BASE_CLASSES,
               isSelected
                 ? "bg-red-900/70 text-white border border-red-500/50"
-                : "bg-white/10 backdrop-blur-sm text-black hover:bg-white/20",
+                : "bg-white/30 backdrop-blur-sm text-black hover:bg-white/20",
               disabled && !isSelected && "cursor-not-allowed opacity-50"
             )}
           >
-            {label}
+            {preset.name}
           </button>
         );
       })}
