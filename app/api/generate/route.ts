@@ -89,16 +89,37 @@ export async function POST(req: NextRequest) {
     let referenceImages: string[] | undefined;
     if (preset.requiresRefs) {
       try {
-        const ref1Path = path.join(process.cwd(), "public/refs/withus_guyA.jpg");
-        const ref2Path = path.join(process.cwd(), "public/refs/withus_guyB.jpg");
+        // Load different reference images based on preset
+        if (presetId === "ilacSceneMatch") {
+          const ref1Path = path.join(process.cwd(), "public/refs/ilac1.jpg");
+          const ref2Path = path.join(process.cwd(), "public/refs/ilac2.jpg");
+          const ref3Path = path.join(process.cwd(), "public/refs/ilac3.jpg");
+          const ref4Path = path.join(process.cwd(), "public/refs/ilac4.jpg");
 
-        const ref1Buffer = await readFile(ref1Path);
-        const ref2Buffer = await readFile(ref2Path);
+          const ref1Buffer = await readFile(ref1Path);
+          const ref2Buffer = await readFile(ref2Path);
+          const ref3Buffer = await readFile(ref3Path);
+          const ref4Buffer = await readFile(ref4Path);
 
-        referenceImages = [
-          `data:image/jpeg;base64,${ref1Buffer.toString("base64")}`,
-          `data:image/jpeg;base64,${ref2Buffer.toString("base64")}`,
-        ];
+          referenceImages = [
+            `data:image/jpeg;base64,${ref1Buffer.toString("base64")}`,
+            `data:image/jpeg;base64,${ref2Buffer.toString("base64")}`,
+            `data:image/jpeg;base64,${ref3Buffer.toString("base64")}`,
+            `data:image/jpeg;base64,${ref4Buffer.toString("base64")}`,
+          ];
+        } else {
+          // Default to "With Us" preset references
+          const ref1Path = path.join(process.cwd(), "public/refs/withus_guyA.jpg");
+          const ref2Path = path.join(process.cwd(), "public/refs/withus_guyB.jpg");
+
+          const ref1Buffer = await readFile(ref1Path);
+          const ref2Buffer = await readFile(ref2Path);
+
+          referenceImages = [
+            `data:image/jpeg;base64,${ref1Buffer.toString("base64")}`,
+            `data:image/jpeg;base64,${ref2Buffer.toString("base64")}`,
+          ];
+        }
       } catch (error) {
         console.error("Error loading reference images:", error);
         // Continue without refs - the generation may still work

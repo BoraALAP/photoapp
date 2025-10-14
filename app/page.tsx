@@ -13,7 +13,7 @@ export default function Home() {
   const { isSignedIn, isLoaded } = useUser();
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [selectedPreset, setSelectedPreset] = useState<string>("toronto");
+  const [selectedPreset, setSelectedPreset] = useState<string>("mapleAutumn");
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [results, setResults] = useState<string[] | null>(null);

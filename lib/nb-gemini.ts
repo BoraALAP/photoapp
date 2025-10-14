@@ -52,8 +52,8 @@ export async function generateImages(
     return match ? match[1] : "image/jpeg";
   };
 
-  // Generate one image per prompt (4 total)
-  for (const prompt of options.prompts) {
+  // Generate all images in parallel
+  const generationPromises = options.prompts.map(async (prompt, index) => {
     try {
       const parts: any[] = [];
 
@@ -86,14 +86,14 @@ export async function generateImages(
       const response = result.response;
 
       // Track token usage
+      let inputTokens = 0;
+      let outputTokens = 0;
       if (response.usageMetadata) {
-        const inputTokens = response.usageMetadata.promptTokenCount || 0;
-        const outputTokens = response.usageMetadata.candidatesTokenCount || 0;
-        totalInputTokens += inputTokens;
-        totalOutputTokens += outputTokens;
+        inputTokens = response.usageMetadata.promptTokenCount || 0;
+        outputTokens = response.usageMetadata.candidatesTokenCount || 0;
 
         if (process.env.NODE_ENV === 'development') {
-          console.log(`Image ${generatedImages.length + 1} token usage:`, {
+          console.log(`Image ${index + 1} token usage:`, {
             inputTokens,
             outputTokens,
             totalTokens: inputTokens + outputTokens,
@@ -116,7 +116,7 @@ export async function generateImages(
           const mimeType = imagePart.inlineData.mimeType || "image/png";
           const base64Data = imagePart.inlineData.data;
           const dataUri = `data:${mimeType};base64,${base64Data}`;
-          generatedImages.push(dataUri);
+          return { dataUri, inputTokens, outputTokens };
         } else {
           console.error("No image data in response parts:", response.candidates[0].content.parts);
           throw new Error("No image generated");
@@ -133,7 +133,17 @@ export async function generateImages(
       console.error("Error generating image for prompt:", prompt, error);
       throw error; // Re-throw to handle at API level
     }
-  }
+  });
+
+  // Wait for all images to generate in parallel
+  const results = await Promise.all(generationPromises);
+
+  // Extract images and accumulate token counts
+  results.forEach((result) => {
+    generatedImages.push(result.dataUri);
+    totalInputTokens += result.inputTokens;
+    totalOutputTokens += result.outputTokens;
+  });
 
   const processingTime = Date.now() - startTime;
 

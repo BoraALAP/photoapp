@@ -12,6 +12,7 @@ import { Logo } from "@/components/logo";
 import { Download } from "lucide-react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import LightRays from "@/components/LightRays";
 
 interface ResultsPageProps {
   images: string[] | null;
@@ -62,8 +63,15 @@ export function ResultsPage({ images, onBack, generating = false, error = null }
   };
 
   return (
-    <div className="min-h-screen h-screen bg-[#0f0a0a] flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 flex flex-col items-center">
+    <div className="min-h-screen h-screen bg-[#0f0a0a] flex flex-col overflow-hidden relative">
+      {/* Light Rays Background - only show during generation */}
+      {generating && (
+        <div className="absolute inset-0 z-0">
+          <LightRays />
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 flex flex-col items-center relative z-10">
         {/* Logo */}
         <div className="mb-6">
           <Logo size={72} />
@@ -88,9 +96,9 @@ export function ResultsPage({ images, onBack, generating = false, error = null }
             Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
-                className="relative aspect-video rounded-3xl overflow-hidden bg-[#2a2a2a]"
+                className="relative aspect-video rounded-3xl overflow-hidden bg-black/40"
               >
-                <Skeleton className="w-full h-full bg-[#3a3a3a]" />
+                <Skeleton className="w-full h-full" />
                 {/* Download Icon Placeholder */}
                 <div className="absolute bottom-6 right-6 w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   <Download className="w-6 h-6 text-white/40" />
@@ -125,7 +133,7 @@ export function ResultsPage({ images, onBack, generating = false, error = null }
       </div>
 
       {/* Back Button */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
         <button
           onClick={onBack}
           className="bg-white text-black px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-colors min-w-[272px]"

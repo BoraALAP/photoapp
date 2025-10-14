@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import { getAllPresets } from "@/lib/presets";
 import { cn } from "@/lib/utils";
+import GlassSurface from "./GlassSurface";
 
 interface PresetSelectorProps {
   selectedPreset: string | null;
@@ -13,7 +14,7 @@ interface PresetSelectorProps {
 }
 
 const BUTTON_BASE_CLASSES =
-  "px-6 py-2 rounded-2xl text-sm whitespace-nowrap transition-all font-bold flex-shrink-0";
+  "px-6 py-0 rounded-2xl text-sm whitespace-nowrap transition-all font-bold flex-shrink-0";
 
 export function PresetSelector({
   selectedPreset,
@@ -140,20 +141,41 @@ export function PresetSelector({
             key={preset.id}
             className="snap-center w-fit"
           >
-            <button
-              type="button"
-              onClick={handleClick}
-              disabled={disabled}
+            <GlassSurface
+              borderRadius={50}
+              height={50}
+              blur={25}
+              displace={4}
               className={cn(
-                BUTTON_BASE_CLASSES,
-                isSelected
-                  ? "bg-red-900/70 text-white border border-red-500/50 scale-110"
-                  : "bg-white/30 backdrop-blur-sm text-black opacity-60 scale-90 cursor-pointer hover:opacity-80",
-                disabled && "cursor-not-allowed opacity-30"
+                "transition-all relative",
+                isSelected ? "scale-110" : "scale-90",
+                disabled && "cursor-not-allowed opacity-30",
+                preset.rainbowBorder && "animate-rainbow before:absolute before:bottom-[-20%] before:left-1/2 before:z-0 before:h-1/5 before:w-3/5 before:-translate-x-1/2 before:animate-rainbow before:bg-[linear-gradient(90deg,var(--color-1),var(--color-5),var(--color-3),var(--color-4),var(--color-2))] before:[filter:blur(0.75rem)]",
+                preset.rainbowBorder && "[background-clip:padding-box,border-box,border-box] [background-origin:border-box] [border:calc(0.125rem)_solid_transparent]"
               )}
+              style={preset.rainbowBorder ? {
+                background: "linear-gradient(#121213,#111111),linear-gradient(#121213 50%,rgba(18,18,19,0.6) 80%,rgba(18,18,19,0)),linear-gradient(90deg,var(--color-1),var(--color-5),var(--color-3),var(--color-4),var(--color-2))",
+                backgroundSize: "200%",
+                ["--speed" as string]: "3s"
+              } : undefined}
             >
-              {preset.name}
-            </button>
+              <button
+                type="button"
+                onClick={handleClick}
+                disabled={disabled}
+                className={cn(
+                  BUTTON_BASE_CLASSES,
+                  isSelected
+                    ? "text-white"
+                    : "text-white opacity-80 cursor-pointer hover:opacity-100",
+                  disabled && "cursor-not-allowed",
+
+                )}
+              >
+                {preset.name}
+              </button>
+            </GlassSurface>
+
           </div>
         );
       })}
