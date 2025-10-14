@@ -25,7 +25,7 @@ export function ResultsPage({ images, onBack, generating = false, error = null }
   const handleDownload = async (imageUrl: string, index: number) => {
     try {
       const fileName = `generated-image-${index + 1}.png`;
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
       // Convert base64 to blob
       const response = await fetch(imageUrl);
