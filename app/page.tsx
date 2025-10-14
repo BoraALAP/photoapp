@@ -9,6 +9,8 @@ import { PresetSelector } from "@/components/preset-selector";
 import { LogIn } from "lucide-react";
 import Image from "next/image";
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const { isSignedIn, isLoaded } = useUser();
   const [photo, setPhoto] = useState<File | null>(null);
@@ -24,9 +26,16 @@ export default function Home() {
   const [totalGens, setTotalGens] = useState<number>(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Mark component as mounted (client-side only)
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Initialize camera on mount
   useEffect(() => {
+    if (!isMounted) return;
     const initCamera = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -51,7 +60,7 @@ export default function Home() {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [isMounted]);
 
   // Update video element when stream changes
   useEffect(() => {
@@ -207,8 +216,13 @@ export default function Home() {
     );
   }
 
-  console.log(isSignedIn, totalGens);
-
+  if (!isMounted) {
+    return (
+      <div className="h-full w-full bg-[#0f0a0a] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full w-full bg-[#0f0a0a] flex flex-col items-center justify-between p-4 gap-4 overflow-hidden">
