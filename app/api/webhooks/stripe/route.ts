@@ -77,7 +77,8 @@ export async function POST(req: NextRequest) {
 
       console.log("Line items:", lineItems.data.length);
 
-      let totalCredits = 0;
+      let totalImageCredits = 0;
+      let totalVideoCredits = 0;
 
       for (const item of lineItems.data) {
         const priceId = typeof item.price === "string" ? item.price : item.price?.id;
@@ -89,26 +90,40 @@ export async function POST(req: NextRequest) {
         if (priceId) {
           const pricingOption = getPricingByPriceId(priceId);
           if (pricingOption) {
-            totalCredits += pricingOption.credits * quantity;
-            console.log(`Matched ${pricingOption.label}: ${pricingOption.credits} credits`);
+            const credits = pricingOption.credits * quantity;
+            if (pricingOption.creditType === 'video') {
+              totalVideoCredits += credits;
+            } else {
+              totalImageCredits += credits;
+            }
+            console.log(`Matched ${pricingOption.label}: ${credits} ${pricingOption.creditType} credits`);
           } else {
             console.log("No price match found for:", priceId);
           }
         }
       }
 
-      console.log("Total credits to add:", totalCredits);
+      console.log("Credits to add:", { image: totalImageCredits, video: totalVideoCredits });
 
-      if (totalCredits > 0) {
-        await incrementCredits(customerId, totalCredits, event.id);
+      if (totalImageCredits > 0) {
+        await incrementCredits(customerId, totalImageCredits, event.id, 'image');
         console.log(
-          `✅ Added ${totalCredits} credits to customer ${customerId} from event ${event.id}`
+          `✅ Added ${totalImageCredits} image credits to customer ${customerId} from event ${event.id}`
         );
-      } else {
+      }
+
+      if (totalVideoCredits > 0) {
+        await incrementCredits(customerId, totalVideoCredits, event.id, 'video');
+        console.log(
+          `✅ Added ${totalVideoCredits} video credits to customer ${customerId} from event ${event.id}`
+        );
+      }
+
+      if (totalImageCredits === 0 && totalVideoCredits === 0) {
         console.warn("⚠️ No credits to add");
       }
 
-      return NextResponse.json({ received: true, credits: totalCredits });
+      return NextResponse.json({ received: true, imageCredits: totalImageCredits, videoCredits: totalVideoCredits });
     } catch (error) {
       console.error("❌ Error processing webhook:", error);
       return NextResponse.json(

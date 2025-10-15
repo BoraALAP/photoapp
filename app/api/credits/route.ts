@@ -39,10 +39,15 @@ export async function GET(req: NextRequest) {
       free_credits: creditData.free_credits,
       image_credits: creditData.image_credits,
       video_credits: creditData.video_credits,
+      video_free_credits: creditData.video_free_credits,
       total_credits: creditData.free_credits + creditData.image_credits,
+      total_video_credits: creditData.video_free_credits + creditData.video_credits,
       total_gens: creditData.total_gens,
+      total_video_gens: creditData.total_video_gens,
       lastGeneratedAt: creditData.last_gen_at,
       lastPreset: creditData.last_preset,
+      lastVideoGeneratedAt: creditData.last_video_gen_at,
+      lastVideoPreset: creditData.last_video_preset,
     });
   } catch (error) {
     console.error("Error fetching credits:", error);

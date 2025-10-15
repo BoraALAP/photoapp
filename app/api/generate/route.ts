@@ -1,12 +1,12 @@
 /**
  * API route for paid generation with credit deduction.
- * Validates credits, decrements, and calls NB-G2.5 for high-quality images.
+ * Validates credits, decrements, and calls NB-G2.5 for images or Veo 3.1 for videos.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getOrCreateStripeCustomer, decrementCredit } from "@/lib/stripe";
-import { generateImages } from "@/lib/nb-gemini";
+import { getOrCreateStripeCustomer, decrementCredit, decrementVideoCredit } from "@/lib/stripe";
+import { generateImages, generateVideo } from "@/lib/nb-gemini";
 import { getPreset } from "@/lib/presets";
 import { watermarkAndDownscale } from "@/lib/watermark";
 import crypto from "crypto";
@@ -70,17 +70,18 @@ export async function POST(req: NextRequest) {
       .digest("hex")
       .substring(0, 16);
 
-    // Attempt to decrement credit atomically
-    const success = await decrementCredit(
-      customer.id,
-      presetId,
-      hash,
-      photoBuffer.length
-    );
+    // Attempt to decrement credit atomically based on preset type
+    const isVideoPreset = preset.type === 'video';
+    const success = isVideoPreset
+      ? await decrementVideoCredit(customer.id, presetId, hash, photoBuffer.length)
+      : await decrementCredit(customer.id, presetId, hash, photoBuffer.length);
 
     if (!success) {
       return NextResponse.json(
-        { error: "Insufficient credits" },
+        {
+          error: `Insufficient ${isVideoPreset ? 'video' : 'image'} credits`,
+          creditType: isVideoPreset ? 'video' : 'image'
+        },
         { status: 402 }
       );
     }
@@ -126,27 +127,47 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Generate images with NB-G2.5
-    const result = await generateImages({
-      baseImage: photoBase64,
-      referenceImages,
-      prompts: preset.prompts,
-      quality: "high",
-    });
+    // Generate content based on preset type
+    if (isVideoPreset) {
+      // Video generation: use first prompt only, generates 1 video
+      const result = await generateVideo({
+        baseImage: photoBase64,
+        prompt: preset.prompts[0],
+      });
 
-    // Watermark all generated images
-    // Free users: watermark + downscale to 768px
-    // Paid users: watermark only, full size
-    const watermarkedImages = await Promise.all(
-      result.images.map((img) => watermarkAndDownscale(img, isFreeGeneration))
-    );
+      // Note: Videos are already watermarked by Veo 3.1 using SynthID
+      // We return the video as-is without additional watermarking
+      return NextResponse.json({
+        success: true,
+        videos: [result.videoUrl],
+        metadata: result.metadata,
+        isFreeGeneration,
+        type: 'video',
+      });
+    } else {
+      // Image generation: use all prompts, generates 4 images
+      const result = await generateImages({
+        baseImage: photoBase64,
+        referenceImages,
+        prompts: preset.prompts,
+        quality: "high",
+      });
 
-    return NextResponse.json({
-      success: true,
-      images: watermarkedImages,
-      metadata: result.metadata,
-      isFreeGeneration,
-    });
+      // Watermark all generated images
+      // Free users: watermark + downscale to 768px
+      // Paid users: watermark only, full size
+      const watermarkedImages = await Promise.all(
+        result.images.map((img) => watermarkAndDownscale(img, isFreeGeneration))
+      );
+
+      return NextResponse.json({
+        success: true,
+        images: watermarkedImages,
+        metadata: result.metadata,
+        isFreeGeneration,
+        type: 'image',
+      });
+    }
   } catch (error) {
     console.error("Error generating images:", error);
     return NextResponse.json(

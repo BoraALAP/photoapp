@@ -9,29 +9,59 @@ export interface PricingOption {
   price: string;
   priceId: string | undefined;
   credits: number;
+  creditType: 'image' | 'video';
 }
 
 export const PRICING_OPTIONS: PricingOption[] = [
+  // Image Credits
   {
-    id: "gen_5",
+    id: "image_sm",
     label: "5 Generation",
     price: "$2.99",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_1,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_IMAGE_SM,
     credits: 5,
+    creditType: 'image',
   },
   {
-    id: "gen_10",
+    id: "image_md",
     label: "10 Generation",
     price: "$4.99",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_5,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_IMAGE_MD,
     credits: 10,
+    creditType: 'image',
   },
   {
-    id: "gen_25",
+    id: "image_lg",
     label: "25 Generation",
     price: "$9.99",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GEN_10,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_IMAGE_LG,
     credits: 25,
+    creditType: 'image',
+  },
+  // Video Credits
+  {
+    id: "video_sm",
+    label: "5 Video Generation",
+    price: "$4.99",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_VIDEO_SM,
+    credits: 5,
+    creditType: 'video',
+  },
+  {
+    id: "video_md",
+    label: "10 Video Generation",
+    price: "$8.99",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_VIDEO_MD,
+    credits: 10,
+    creditType: 'video',
+  },
+  {
+    id: "video_lg",
+    label: "25 Video Generation",
+    price: "$19.99",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_VIDEO_LG,
+    credits: 25,
+    creditType: 'video',
   },
 ];
 

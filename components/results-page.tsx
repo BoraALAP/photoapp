@@ -1,9 +1,9 @@
 /**
  * ResultsPage Component
  *
- * Displays the 4 generated AI images in a grid layout with download buttons.
+ * Displays generated AI images (4 in grid) or videos (1 full width) with download buttons.
  * Shows skeleton loaders during generation and error states.
- * Each image has a download button overlay in the bottom right corner.
+ * Each item has a download button overlay in the bottom right corner.
  */
 
 "use client";
@@ -15,20 +15,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import LightRays from "@/components/LightRays";
 
 interface ResultsPageProps {
-  images: string[] | null;
+  images?: string[] | null;
+  videos?: string[] | null;
   onBack: () => void;
   generating?: boolean;
   error?: string | null;
+  generatingType?: 'image' | 'video';
 }
 
-export function ResultsPage({ images, onBack, generating = false, error = null }: ResultsPageProps) {
-  const handleDownload = async (imageUrl: string, index: number) => {
+export function ResultsPage({ images, videos, onBack, generating = false, error = null, generatingType = 'image' }: ResultsPageProps) {
+  // Determine if we're showing video content
+  const isVideo = (videos && videos.length > 0) || (generating && generatingType === 'video');
+  const content = isVideo ? videos : images;
+
+  const handleDownload = async (contentUrl: string, index: number) => {
     try {
-      const fileName = `generated-image-${index + 1}.png`;
+      const fileName = isVideo
+        ? `generated-video-${index + 1}.mp4`
+        : `generated-image-${index + 1}.png`;
       const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
       // Convert base64 to blob
-      const response = await fetch(imageUrl);
+      const response = await fetch(contentUrl);
       const blob = await response.blob();
 
       if (isMobile && navigator.share) {
@@ -58,7 +66,7 @@ export function ResultsPage({ images, onBack, generating = false, error = null }
       document.body.removeChild(a);
     } catch (error) {
       console.error("Download failed:", error);
-      alert("Failed to download image");
+      alert(`Failed to download ${isVideo ? 'video' : 'image'}`);
     }
   };
 
@@ -81,7 +89,9 @@ export function ResultsPage({ images, onBack, generating = false, error = null }
         {(generating || error) && (
           <div className="w-full text-center mb-4">
             {generating && (
-              <p className="text-white text-lg font-medium">Generating...</p>
+              <p className="text-white text-lg font-medium">
+                {isVideo ? 'Generating video (this may take a few minutes)...' : 'Generating...'}
+              </p>
             )}
             {error && (
               <p className="text-red-400 text-lg font-medium">{error}</p>
@@ -89,14 +99,14 @@ export function ResultsPage({ images, onBack, generating = false, error = null }
           </div>
         )}
 
-        {/* Grid of Images or Skeletons */}
-        <div className="grid md:grid-cols-2 w-full gap-2 mb-4">
+        {/* Grid of Images/Videos or Skeletons */}
+        <div className={isVideo ? "w-full mb-4" : "grid md:grid-cols-2 w-full gap-2 mb-4"}>
           {generating || error ? (
-            // Show 4 skeleton loaders
-            Array.from({ length: 4 }).map((_, index) => (
+            // Show skeleton loaders
+            Array.from({ length: isVideo ? 1 : 4 }).map((_, index) => (
               <div
                 key={index}
-                className="relative aspect-video rounded-3xl overflow-hidden bg-black/40"
+                className={`relative aspect-video rounded-3xl overflow-hidden bg-black/40 ${isVideo ? 'w-full' : ''}`}
               >
                 <Skeleton className="w-full h-full" />
                 {/* Download Icon Placeholder */}
@@ -105,9 +115,34 @@ export function ResultsPage({ images, onBack, generating = false, error = null }
                 </div>
               </div>
             ))
+          ) : isVideo ? (
+            // Show video
+            content?.map((videoUrl, index) => (
+              <div
+                key={index}
+                className="relative aspect-video rounded-3xl overflow-hidden bg-black"
+              >
+                <video
+                  src={videoUrl}
+                  controls
+                  autoPlay
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+
+                {/* Download Button */}
+                <button
+                  onClick={() => handleDownload(videoUrl, index)}
+                  className="absolute bottom-6 right-6 w-10 h-10 bg-white rounded-xl flex items-center justify-center hover:bg-gray-100 transition-colors"
+                >
+                  <Download className="w-6 h-6 text-black" />
+                </button>
+              </div>
+            ))
           ) : (
-            // Show actual images
-            images?.map((imageUrl, index) => (
+            // Show images
+            content?.map((imageUrl, index) => (
               <div
                 key={index}
                 className="relative aspect-video rounded-3xl overflow-hidden bg-black"

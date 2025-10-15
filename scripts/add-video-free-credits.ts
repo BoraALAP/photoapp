@@ -1,17 +1,16 @@
 /**
- * Migration Script: Update Stripe Customer Metadata Structure
+ * Migration Script: Add Video Free Credits to Existing Users
  *
- * Migrates existing customers from old credit structure to new structure:
- * OLD: { credits, total_gens }
- * NEW: { free_credits, image_credits, video_credits, total_gens }
+ * Adds 2 video free credits to all existing Stripe customers who don't have them yet.
+ * This is for users created before the video credit feature was implemented.
  *
  * Usage:
- *   npx tsx scripts/migrate-stripe-metadata.ts
- *   Or: STRIPE_SECRET_KEY=sk_live_xxx npx tsx scripts/migrate-stripe-metadata.ts
+ *   npx tsx scripts/add-video-free-credits.ts
+ *   Or: STRIPE_SECRET_KEY=sk_test_xxx npx tsx scripts/add-video-free-credits.ts
  *
  * Options:
  *   --dry-run    Preview changes without updating Stripe (default)
- *   --live       Confirm you want to run against live Stripe data
+ *   --live       Confirm you want to run against Stripe data
  */
 
 import Stripe from "stripe";
@@ -35,15 +34,15 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, {
 
 interface MigrationStats {
   total: number;
-  migrated: number;
+  updated: number;
   skipped: number;
   errors: number;
 }
 
-async function migrateCustomerMetadata(dryRun: boolean = false) {
+async function addVideoFreeCredits(dryRun: boolean = true) {
   const stats: MigrationStats = {
     total: 0,
-    migrated: 0,
+    updated: 0,
     skipped: 0,
     errors: 0,
   };
@@ -52,7 +51,7 @@ async function migrateCustomerMetadata(dryRun: boolean = false) {
   let startingAfter: string | undefined;
 
   console.log("\n" + "=".repeat(60));
-  console.log("  Stripe Customer Metadata Migration");
+  console.log("  Add Video Free Credits to Existing Users");
   console.log("=".repeat(60));
   console.log(`Mode: ${dryRun ? "DRY RUN (preview only)" : "LIVE UPDATE"}`);
   console.log(`Environment: ${STRIPE_SECRET_KEY.startsWith("sk_live") ? "PRODUCTION" : "TEST"}`);
@@ -77,59 +76,61 @@ async function migrateCustomerMetadata(dryRun: boolean = false) {
         stats.total++;
 
         try {
-          // Check if customer needs migration
-          const hasOldFormat = customer.metadata.credits !== undefined;
-          const hasNewFormat = customer.metadata.free_credits !== undefined;
-
-          if (!hasOldFormat && !hasNewFormat) {
-            // No metadata at all - skip
+          // Check if customer has metadata
+          if (!customer.metadata || Object.keys(customer.metadata).length === 0) {
             stats.skipped++;
             console.log(`⊘ Skipped ${customer.id} (${customer.email || "no email"}) - no metadata`);
             continue;
           }
 
-          if (hasNewFormat) {
-            // Already migrated
+          // Check if customer already has video_free_credits
+          const currentVideoFreeCredits = customer.metadata.video_free_credits;
+
+          if (currentVideoFreeCredits !== undefined && currentVideoFreeCredits !== "" && currentVideoFreeCredits !== "0") {
             stats.skipped++;
-            console.log(`⊘ Skipped ${customer.id} (${customer.email || "no email"}) - already migrated`);
+            console.log(`⊘ Skipped ${customer.id} (${customer.email || "no email"}) - already has video_free_credits: ${currentVideoFreeCredits}`);
             continue;
           }
 
-          // Needs migration
-          const oldCredits = parseInt(customer.metadata.credits || "0");
-          const totalGens = customer.metadata.total_gens || "0";
+          // Check if this is an actual user (has some generation history or credits)
+          const hasImageCredits = customer.metadata.image_credits !== undefined && customer.metadata.image_credits !== "";
+          const hasFreeCredits = customer.metadata.free_credits !== undefined && customer.metadata.free_credits !== "";
+          const hasTotalGens = customer.metadata.total_gens !== undefined && customer.metadata.total_gens !== "" && customer.metadata.total_gens !== "0";
 
+          if (!hasImageCredits && !hasFreeCredits && !hasTotalGens) {
+            stats.skipped++;
+            console.log(`⊘ Skipped ${customer.id} (${customer.email || "no email"}) - no credit history`);
+            continue;
+          }
+
+          // Add video free credits
           const newMetadata: Record<string, string> = {
-            free_credits: "0", // Existing users don't get retroactive free credits
-            image_credits: oldCredits.toString(),
-            video_credits: "0",
-            total_gens: totalGens,
-            // Preserve other metadata fields
-            ...(customer.metadata.last_gen_at && { last_gen_at: customer.metadata.last_gen_at }),
-            ...(customer.metadata.last_preset && { last_preset: customer.metadata.last_preset }),
-            ...(customer.metadata.last_event_id && { last_event_id: customer.metadata.last_event_id }),
-            ...(customer.metadata.last_bytes && { last_bytes: customer.metadata.last_bytes }),
-            ...(customer.metadata.last_hash && { last_hash: customer.metadata.last_hash }),
-            // Remove old 'credits' field by setting it to empty string
-            credits: "",
+            ...customer.metadata,
+            video_free_credits: "2",
+            total_video_gens: customer.metadata.total_video_gens || "0",
+            video_credits: customer.metadata.video_credits || "0",
           };
 
           if (dryRun) {
-            console.log(`[DRY RUN] Would migrate ${customer.id} (${customer.email || "no email"})`);
-            console.log(`  Old: credits=${oldCredits}, total_gens=${totalGens}`);
-            console.log(`  New: free_credits=0, image_credits=${oldCredits}, video_credits=0`);
+            console.log(`[DRY RUN] Would update ${customer.id} (${customer.email || "no email"})`);
+            console.log(`  Adding: video_free_credits=2`);
+            console.log(`  Current metadata: ${JSON.stringify({
+              free_credits: customer.metadata.free_credits,
+              image_credits: customer.metadata.image_credits,
+              total_gens: customer.metadata.total_gens,
+            })}`);
           } else {
             await stripe.customers.update(customer.id, {
               metadata: newMetadata,
             });
-            console.log(`✓ Migrated ${customer.id} (${customer.email || "no email"})`);
-            console.log(`  credits: ${oldCredits} → image_credits: ${oldCredits}`);
+            console.log(`✓ Updated ${customer.id} (${customer.email || "no email"})`);
+            console.log(`  Added: video_free_credits=2`);
           }
 
-          stats.migrated++;
+          stats.updated++;
         } catch (error) {
           stats.errors++;
-          console.error(`✗ Error migrating ${customer.id}:`, error instanceof Error ? error.message : error);
+          console.error(`✗ Error updating ${customer.id}:`, error instanceof Error ? error.message : error);
         }
       }
 
@@ -148,7 +149,7 @@ async function migrateCustomerMetadata(dryRun: boolean = false) {
   console.log("  Migration Complete");
   console.log("=".repeat(60));
   console.log(`Total customers:     ${stats.total}`);
-  console.log(`Migrated:            ${stats.migrated}`);
+  console.log(`Updated:             ${stats.updated}`);
   console.log(`Skipped:             ${stats.skipped}`);
   console.log(`Errors:              ${stats.errors}`);
   console.log("=".repeat(60) + "\n");
@@ -156,7 +157,7 @@ async function migrateCustomerMetadata(dryRun: boolean = false) {
   if (dryRun) {
     console.log("💡 This was a DRY RUN. No changes were made to Stripe.");
     console.log("   To perform the actual migration, run:");
-    console.log("   STRIPE_SECRET_KEY=your_key npx tsx scripts/migrate-stripe-metadata.ts --live\n");
+    console.log("   STRIPE_SECRET_KEY=your_key npx tsx scripts/add-video-free-credits.ts --live\n");
   } else {
     console.log("✅ Migration completed successfully!\n");
   }
@@ -166,13 +167,8 @@ async function migrateCustomerMetadata(dryRun: boolean = false) {
 const args = process.argv.slice(2);
 const isDryRun = !args.includes("--live");
 
-if (!isDryRun && !args.includes("--live")) {
-  console.log("⚠️  Please specify --live to run the migration, or run without flags for a dry run.\n");
-  process.exit(1);
-}
-
 // Run migration
-migrateCustomerMetadata(isDryRun).catch((error) => {
+addVideoFreeCredits(isDryRun).catch((error) => {
   console.error("\n❌ Migration failed:", error);
   process.exit(1);
 });

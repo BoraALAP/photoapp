@@ -10,6 +10,7 @@ export interface Preset {
   prompts: string[];
   requiresRefs: boolean;
   rainbowBorder?: boolean;
+  type: 'image' | 'video';
 }
 
 const genericStyle = "The person is in a Canadian setting, natural composition, make the person look happy and relaxed, friendly atmosphere, realistic photo, high-resolution, cinematic detail, even lighting preserving all facial features, natural confident expression, photorealistic portrait quality, be creative. Do not just place the persons face to the picture. Blend the person into the picture with right proportions.";
@@ -20,6 +21,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "Maple Autumn",
     description: "Golden fall leaves and cozy Canadian atmosphere",
     requiresRefs: false,
+    type: 'image',
     prompts: [
       `${genericStyle}. A person surrounded by red and orange maple leaves, autumn park in Canada, warm sunlight filtering through the trees, cozy flannel outfit`,
       `${genericStyle}. A person walking through a forest trail covered in colorful fall foliage, holding a hot coffee cup, misty morning light`,
@@ -32,6 +34,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "Winter Wonderland",
     description: "Snowy Canadian winter moments",
     requiresRefs: false,
+    type: 'image',
     prompts: [
       `${genericStyle}. A person bundled up in winter coat and toque, standing in a snowy forest, gentle snowfall, serene atmosphere`,
       `${genericStyle}. A person ice skating on a frozen lake surrounded by pine trees, distant mountains, soft winter light`,
@@ -44,6 +47,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "Northern Lights",
     description: "Magical aurora and night sky filters",
     requiresRefs: false,
+    type: 'image',
     prompts: [
       `${genericStyle}. A person standing under the Northern Lights, vibrant green and purple aurora dancing across the sky, reflective snowfield foreground`,
       `${genericStyle}. A person gazing at aurora borealis over a frozen lake in Yukon, stars clearly visible, dark blue night sky`,
@@ -56,6 +60,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "Cottage Life",
     description: "Peaceful lakefront and cozy cabin filters",
     requiresRefs: false,
+    type: 'image',
     prompts: [
       `${genericStyle}. A person sitting on a wooden dock by a calm Canadian lake, surrounded by forest, golden sunrise light`,
       `${genericStyle}. A person reading a book by a campfire near a rustic log cabin, twilight setting, gentle smoke rising`,
@@ -68,6 +73,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "Urban Canada",
     description: "Modern Canadian city life filter",
     requiresRefs: false,
+    type: 'image',
     prompts: [
       `${genericStyle}. A person crossing a downtown street with modern glass towers, Canada flag visible, lively urban atmosphere`,
       `${genericStyle}. A person having coffee at a trendy café with street art murals behind, city life vibe, soft daylight`,
@@ -81,6 +87,7 @@ export const PRESETS: Record<string, Preset> = {
     description: "Places the person naturally into ILAC Toronto school interiors: lobby, corridors, and themed halls.",
     requiresRefs: true, // expects the 4 ILAC photos as reference backgrounds
     rainbowBorder: true,
+    type: 'image',
     prompts: [
       // 1. Lobby with ILAC branding and colorful seating
       `${genericStyle}. Use the ILAC LOBBY background plate (colorful couches, blue walls, ILAC logo columns). Place the person casually standing or sitting within the lobby area, well-integrated with reflections on the floor. Match warm indoor lighting and soft ceiling lights; maintain perspective and correct shadowing on the floor; keep ILAC signage visible and crisp.`,
@@ -97,6 +104,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "Wilderness Explorer",
     description: "Wild landscapes and adventure scenes",
     requiresRefs: false,
+    type: 'image',
     prompts: [
       `${genericStyle}. A person hiking on a rocky trail overlooking a vast Canadian mountain valley, dramatic clouds, adventure tone`,
       `${genericStyle}. A person near a waterfall surrounded by evergreen forest, mist in the air, vibrant natural colors`,
@@ -109,6 +117,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "Editorial Canada",
     description: "Stylish portrait filters inspired by Canadian fashion & culture",
     requiresRefs: false,
+    type: 'image',
     prompts: [
       `${genericStyle}. A person posing confidently in a modern winter coat with urban skyline backdrop, soft studio-style outdoor lighting`,
       `${genericStyle}. A person in an editorial-style portrait shot against minimalist Canadian architectural background, muted tones`,
@@ -121,6 +130,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "Canadian Wildlife Party",
     description: "Funny and surreal wildlife interactions in Canadian settings",
     requiresRefs: false,
+    type: 'image',
     prompts: [
       `${genericStyle}. A person relaxing in an outdoor hot tub surrounded by friendly cartoonish beavers wearing sunglasses, steam rising, Canadian forest background, humorous yet photorealistic style`,
       `${genericStyle}. A person hanging out with two moose by a lakeside picnic table, sharing pancakes and maple syrup, morning sunlight, playful and realistic photo quality`,
@@ -133,6 +143,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "Eh Edition",
     description: "Lighthearted and comedic takes on Canadian stereotypes",
     requiresRefs: false,
+    type: 'image',
     prompts: [
       `${genericStyle}. A person dressed as a Mountie sharing a coffee with a moose at a Tim Hortons patio, fun and friendly vibe, photorealistic humor`,
       `${genericStyle}. A person holding an oversized bottle of maple syrup like a trophy, surrounded by Canadian flags, proud and silly pose`,
@@ -145,6 +156,7 @@ export const PRESETS: Record<string, Preset> = {
     name: "With Us",
     description: "User appears with two reference hosts in Canadian settings",
     requiresRefs: true,
+    type: 'image',
     prompts: [
       `${genericStyle}. Three people together in a scenic Canadian outdoor setting, natural group composition, friendly atmosphere, realistic proportions, high-quality photograph`,
       `${genericStyle}. Three friends posing at a cozy lakeside cabin, autumn foliage, balanced composition, all faces clearly visible`,
@@ -152,9 +164,39 @@ export const PRESETS: Record<string, Preset> = {
       `${genericStyle}. Three people walking through a downtown Canadian street with flags and cafés, relaxed group photo, realistic photo quality`,
     ],
   },
+  mapleAutumnVideo: {
+    id: "mapleAutumnVideo",
+    name: "Maple Autumn (Video)",
+    description: "Animated fall leaves and cozy Canadian atmosphere",
+    requiresRefs: false,
+    type: 'video',
+    prompts: [
+      `Camera slowly pushes in while maintaining the person in frame. Scene immediately comes alive with movement from the start. ${genericStyle}. A person surrounded by red and orange maple leaves swirling and drifting continuously, autumn park in Canada, warm sunlight filtering through the trees, cozy flannel outfit, constant gentle breeze creating dynamic motion throughout, leaves falling and spinning continuously`
+    ],
+  },
+  winterWonderlandVideo: {
+    id: "winterWonderlandVideo",
+    name: "Winter Wonderland (Video)",
+    description: "Snowy Canadian winter moments with animation",
+    requiresRefs: false,
+    type: 'video',
+    prompts: [
+      `Camera gently pans and zooms, scene begins with immediate motion. ${genericStyle}. A person bundled up in winter coat and toque, standing in a snowy forest, continuous gentle snowfall with flakes drifting and swirling from the beginning, serene atmosphere, snow falling continuously creating dynamic movement throughout the entire scene`,
+    ],
+  },
+  northernLightsVideo: {
+    id: "northernLightsVideo",
+    name: "Northern Lights (Video)",
+    description: "Magical animated aurora and night sky",
+    requiresRefs: false,
+    type: 'video',
+    prompts: [
+      `Camera slowly pushes forward while scene comes alive from the start. ${genericStyle}. A person standing under the Northern Lights, vibrant green and purple aurora actively dancing and flowing across the sky from the beginning, reflective snowfield foreground, aurora continuously moving and shifting with dynamic waves and ripples throughout`
+    ],
+  },
 };
 
-export const PRESET_ORDER = ["mapleAutumn", "winterWonderland", "northernLights", "cottageLife", "urbanCanada", "ilacSceneMatch","wildernessExplorer", "editorialCanada", "canadianWildlifeParty", "ehEdition", "withus"];
+export const PRESET_ORDER = ["mapleAutumn", "winterWonderland", "northernLights", "cottageLife", "urbanCanada", "ilacSceneMatch","wildernessExplorer", "editorialCanada", "canadianWildlifeParty", "ehEdition", "withus", "mapleAutumnVideo", "winterWonderlandVideo", "northernLightsVideo"];
 
 export function getPreset(id: string): Preset | undefined {
   return PRESETS[id];
