@@ -168,7 +168,7 @@ export function ResultsPage({ images, videos, onBack, generating = false, error 
       </div>
 
       {/* Back Button */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+      <div className=" p-4 self-center">
         <button
           onClick={onBack}
           className="bg-white text-black px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-colors min-w-[272px]"
