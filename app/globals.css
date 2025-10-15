@@ -208,3 +208,12 @@
     display: none;
   }
 }
+
+/* Prevent Clerk modal from closing on backdrop click */
+.cl-modalBackdrop {
+  pointer-events: none !important;
+}
+
+.cl-modalBackdrop > * {
+  pointer-events: auto !important;
+}

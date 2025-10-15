@@ -22,7 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        elements: {
+          modalBackdrop: "backdrop-blur-sm",
+        },
+      }}
+    >
       <html lang="en" className="h-full">
         <body className="antialiased h-full bg-[#0f0a0a] overflow-hidden">
           {children}

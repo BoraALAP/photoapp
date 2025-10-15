@@ -89,6 +89,16 @@ export default function Home() {
     fetchCredits();
   }, [isSignedIn]);
 
+  // Auto-open sign-in dialog when landing without authentication
+  useEffect(() => {
+    if (isLoaded && !isSignedIn && isMounted) {
+      const signInButton = document.querySelector('[data-clerk-sign-in]') as HTMLButtonElement;
+      if (signInButton) {
+        signInButton.click();
+      }
+    }
+  }, [isLoaded, isSignedIn, isMounted]);
+
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
 
@@ -276,7 +286,11 @@ export default function Home() {
                 }}
               />
             ) : (
-              <SignInButton mode="modal">
+              <SignInButton
+                mode="modal"
+                forceRedirectUrl="/"
+                signUpForceRedirectUrl="/"
+              >
                 <button
                   data-clerk-sign-in
                   className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-gray-100 transition-colors"
