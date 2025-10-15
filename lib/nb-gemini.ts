@@ -245,7 +245,7 @@ export async function generateVideo(
     }
 
     let operation = await ai.models.generateVideos({
-      model: "veo-3.1-generate-preview",
+      model: "veo-3.1-fast-generate-preview",
       prompt: options.prompt,
       image: imageInput,
     });
@@ -397,7 +397,7 @@ export async function generateVideo(
 
         if (process.env.NODE_ENV === 'development') {
           console.log("=== Video Generation Summary ===", {
-            model: "veo-3.1-generate-preview",
+            model: "veo-3.1-fast-generate-preview",
             processingTimeMs: processingTime,
             videoSizeKB: Math.round(videoBuffer.length / 1024),
           });
@@ -413,7 +413,7 @@ export async function generateVideo(
         return {
           videoUrl: videoDataUri,
           metadata: {
-            model: "veo-3.1-generate-preview",
+            model: "veo-3.1-fast-generate-preview",
             processingTime,
             duration: 8, // Veo 3.1 generates 8-second videos
           },
