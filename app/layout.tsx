@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function RootLayout({
       <html lang="en" className="h-full">
         <body className="antialiased h-full bg-[#0f0a0a] overflow-hidden">
           {children}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
