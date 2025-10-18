@@ -6,7 +6,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getOrCreateStripeCustomer, decrementCredit, decrementVideoCredit } from "@/lib/stripe";
-import { generateImages, generateVideo } from "@/lib/nb-gemini";
+import { generateImages } from "@/lib/image-generation";
+import { generateVideo } from "@/lib/video-generation";
 import { getPreset } from "@/lib/presets";
 import { watermarkAndDownscale } from "@/lib/watermark";
 import crypto from "crypto";
