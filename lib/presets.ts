@@ -3,6 +3,8 @@
  * Each preset contains prompt variants for generating creative scene-based images.
  */
 
+import { PhotoStyleId } from './photo-styles';
+
 export interface Preset {
   id: string;
   name: string;
@@ -16,6 +18,14 @@ export interface Preset {
 const photoRealisticStyle = "The person is in a Canadian setting, natural composition, make the person look happy and relaxed, friendly atmosphere, realistic photo, high-resolution, cinematic detail, even lighting preserving all facial features, natural confident expression, photorealistic portrait quality, be creative. Do not just place the persons face to the picture. Blend the person into the picture with right proportions.";
 
 const cartoonStyle = "The person is in a Canadian setting, vibrant cartoon illustration style, animated character design, make the person look happy and cheerful, friendly atmosphere, colorful and expressive, high-quality digital art, even lighting preserving all facial features, natural confident expression, cartoon portrait quality with clean lines and bold colors, be creative. Do not just place the persons face to the picture. Blend the person into the cartoon scene with right proportions and consistent art style.";
+
+const vintage50sStyle = "The person is in a Canadian setting with authentic 1950s vintage aesthetic, retro color grading with slightly faded warm tones, subtle film grain and vignette, period-appropriate styling, nostalgic atmosphere, vintage photo quality resembling old photographs from the era, natural happy expression, friendly atmosphere, be creative. Do not just place the persons face to the picture. Blend the person into the vintage scene with right proportions and authentic period feel.";
+
+const cinematicStyle = "The person is in a Canadian setting with dramatic cinematic look, moody atmospheric lighting, rich color grading with deep shadows and highlights, film-like quality with shallow depth of field, epic composition, movie poster aesthetic, professional color correction, natural confident expression, friendly atmosphere, be creative. Do not just place the persons face to the picture. Blend the person into the cinematic scene with right proportions and dramatic impact.";
+
+const oilPaintingStyle = "The person is in a Canadian setting rendered as a classical oil painting, visible brush strokes and rich texture, traditional painting techniques, warm color palette with depth, artistic interpretation while maintaining likeness, museum-quality portrait style, natural happy expression, friendly atmosphere, fine art quality, be creative. Do not just place the persons face to the picture. Blend the person into the painted scene with right proportions and artistic style.";
+
+const watercolorStyle = "The person is in a Canadian setting painted in soft watercolor technique, delicate color washes and gentle blending, translucent layers with artistic flow, light and airy atmosphere, painterly edges and soft details, natural happy expression, friendly atmosphere, fine watercolor art quality, be creative. Do not just place the persons face to the picture. Blend the person into the watercolor scene with right proportions and artistic style.";
 
 const genericStyle = photoRealisticStyle;
 
@@ -182,18 +192,28 @@ export function getAllPresets(): Preset[] {
 }
 
 /**
- * Get preset prompts with a specific style (photorealistic or cartoon)
+ * Get preset prompts with a specific photo style
  */
-export function getPresetPromptsWithStyle(presetId: string, isCartoon: boolean): string[] {
+export function getPresetPromptsWithStyle(presetId: string, styleId: PhotoStyleId = 'photorealistic'): string[] {
   const preset = PRESETS[presetId];
   if (!preset) {
     return [];
   }
 
-  const style = isCartoon ? cartoonStyle : photoRealisticStyle;
+  // Map style IDs to their corresponding style strings
+  const styleMap: Record<PhotoStyleId, string> = {
+    'photorealistic': photoRealisticStyle,
+    'cartoon': cartoonStyle,
+    'vintage50s': vintage50sStyle,
+    'cinematic': cinematicStyle,
+    'oil-painting': oilPaintingStyle,
+    'watercolor': watercolorStyle,
+  };
+
+  const selectedStyle = styleMap[styleId] || photoRealisticStyle;
 
   // Replace the genericStyle in each prompt with the selected style
   return preset.prompts.map(prompt =>
-    prompt.replace(photoRealisticStyle, style)
+    prompt.replace(photoRealisticStyle, selectedStyle)
   );
 }

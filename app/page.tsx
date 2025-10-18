@@ -12,6 +12,7 @@ import { useAutoSignIn } from "@/hooks/useAutoSignIn";
 import { usePhotoCapture } from "@/hooks/usePhotoCapture";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
 import { getPreset } from "@/lib/presets";
+import { PhotoStyleId, DEFAULT_PHOTO_STYLE } from "@/lib/photo-styles";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export default function Home() {
   const { isSignedIn, isLoaded } = useUser();
   const [selectedPreset, setSelectedPreset] = useState<string>("mapleAutumn");
   const [isMounted, setIsMounted] = useState(false);
-  const [isCartoonMode, setIsCartoonMode] = useState(false);
+  const [selectedStyle, setSelectedStyle] = useState<PhotoStyleId>(DEFAULT_PHOTO_STYLE);
 
   // Mark component as mounted (client-side only)
   useEffect(() => {
@@ -59,7 +60,7 @@ export default function Home() {
     canvasRef,
     stream,
     stopCamera,
-    onCapture: (file) => handleGenerate(file, selectedPreset, isCartoonMode),
+    onCapture: (file) => handleGenerate(file, selectedPreset, selectedStyle),
   });
 
   // Auto-open sign-in dialog for unauthenticated users
@@ -79,7 +80,7 @@ export default function Home() {
 
   const handleGenerateClick = async () => {
     if (photo) {
-      await handleGenerate(photo, selectedPreset, isCartoonMode);
+      await handleGenerate(photo, selectedPreset, selectedStyle);
     }
   };
 
@@ -128,11 +129,11 @@ export default function Home() {
         stream={stream}
         selectedPresetType={selectedPresetType}
         hasCredits={hasCredits}
-        isCartoonMode={isCartoonMode}
+        selectedStyle={selectedStyle}
         onCapture={capturePhoto}
         onGenerate={handleGenerateClick}
         onPurchase={() => setShowPurchaseModal(true)}
-        onToggleCartoon={() => setIsCartoonMode(!isCartoonMode)}
+        onStyleChange={setSelectedStyle}
       />
 
       {/* Purchase Modal */}

@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const photoFile = formData.get("photo") as File;
     const presetId = formData.get("presetId") as string;
-    const isCartoon = formData.get("isCartoon") === "true";
+    const styleId = (formData.get("styleId") as string) || "photorealistic";
 
     if (!photoFile || !presetId) {
       return NextResponse.json(
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get styled prompts based on user preference
-    const styledPrompts = getPresetPromptsWithStyle(presetId, isCartoon);
+    const styledPrompts = getPresetPromptsWithStyle(presetId, styleId as any);
 
     // Generate content based on preset type
     if (isVideoPreset) {

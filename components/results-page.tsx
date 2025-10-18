@@ -71,7 +71,7 @@ export function ResultsPage({ images, videos, onBack, generating = false, error 
   };
 
   return (
-    <div className="min-h-screen h-screen bg-[#0f0a0a] flex flex-col overflow-hidden relative">
+    <div className="min-h-screen h-full bg-[#0f0a0a] flex flex-col overflow-y-auto pb-24">
       {/* Light Rays Background - only show during generation */}
       {generating && (
         <div className="absolute inset-0 z-0">
@@ -79,7 +79,7 @@ export function ResultsPage({ images, videos, onBack, generating = false, error 
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 flex flex-col items-center relative z-10">
+      <div className="flex-1 pt-4 px-4 flex flex-col items-center z-10">
         {/* Logo */}
         <div className="mb-6">
           <Logo size={72} />

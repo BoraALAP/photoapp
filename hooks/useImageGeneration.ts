@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+import { PhotoStyleId } from "@/lib/photo-styles";
 
 export function useImageGeneration(
   isSignedIn: boolean,
@@ -17,7 +18,7 @@ export function useImageGeneration(
   const [error, setError] = useState<string | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
-  const handleGenerate = async (file: File, presetId: string, isCartoonMode: boolean = false) => {
+  const handleGenerate = async (file: File, presetId: string, styleId: PhotoStyleId = 'photorealistic') => {
     if (!file || !presetId) return;
 
     // Require sign-in for generation
@@ -38,7 +39,7 @@ export function useImageGeneration(
       const formData = new FormData();
       formData.append("photo", file);
       formData.append("presetId", presetId);
-      formData.append("isCartoon", isCartoonMode.toString());
+      formData.append("styleId", styleId);
 
       const endpoint = "/api/generate";
       const res = await fetch(endpoint, {
