@@ -13,7 +13,11 @@ export interface Preset {
   type: 'image' | 'video';
 }
 
-const genericStyle = "The person is in a Canadian setting, natural composition, make the person look happy and relaxed, friendly atmosphere, realistic photo, high-resolution, cinematic detail, even lighting preserving all facial features, natural confident expression, photorealistic portrait quality, be creative. Do not just place the persons face to the picture. Blend the person into the picture with right proportions.";
+const photoRealisticStyle = "The person is in a Canadian setting, natural composition, make the person look happy and relaxed, friendly atmosphere, realistic photo, high-resolution, cinematic detail, even lighting preserving all facial features, natural confident expression, photorealistic portrait quality, be creative. Do not just place the persons face to the picture. Blend the person into the picture with right proportions.";
+
+const cartoonStyle = "The person is in a Canadian setting, vibrant cartoon illustration style, animated character design, make the person look happy and cheerful, friendly atmosphere, colorful and expressive, high-quality digital art, even lighting preserving all facial features, natural confident expression, cartoon portrait quality with clean lines and bold colors, be creative. Do not just place the persons face to the picture. Blend the person into the cartoon scene with right proportions and consistent art style.";
+
+const genericStyle = photoRealisticStyle;
 
 export const PRESETS: Record<string, Preset> = {
   mapleAutumn: {
@@ -175,4 +179,21 @@ export function getPreset(id: string): Preset | undefined {
 
 export function getAllPresets(): Preset[] {
   return PRESET_ORDER.map((id) => PRESETS[id]);
+}
+
+/**
+ * Get preset prompts with a specific style (photorealistic or cartoon)
+ */
+export function getPresetPromptsWithStyle(presetId: string, isCartoon: boolean): string[] {
+  const preset = PRESETS[presetId];
+  if (!preset) {
+    return [];
+  }
+
+  const style = isCartoon ? cartoonStyle : photoRealisticStyle;
+
+  // Replace the genericStyle in each prompt with the selected style
+  return preset.prompts.map(prompt =>
+    prompt.replace(photoRealisticStyle, style)
+  );
 }

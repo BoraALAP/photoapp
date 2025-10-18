@@ -17,7 +17,7 @@ export function useImageGeneration(
   const [error, setError] = useState<string | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
-  const handleGenerate = async (file: File, presetId: string) => {
+  const handleGenerate = async (file: File, presetId: string, isCartoonMode: boolean = false) => {
     if (!file || !presetId) return;
 
     // Require sign-in for generation
@@ -38,6 +38,7 @@ export function useImageGeneration(
       const formData = new FormData();
       formData.append("photo", file);
       formData.append("presetId", presetId);
+      formData.append("isCartoon", isCartoonMode.toString());
 
       const endpoint = "/api/generate";
       const res = await fetch(endpoint, {

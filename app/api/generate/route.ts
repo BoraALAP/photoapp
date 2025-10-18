@@ -8,7 +8,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getOrCreateStripeCustomer, decrementCredit, decrementVideoCredit } from "@/lib/stripe";
 import { generateImages } from "@/lib/image-generation";
 import { generateVideo } from "@/lib/video-generation";
-import { getPreset } from "@/lib/presets";
+import { getPreset, getPresetPromptsWithStyle } from "@/lib/presets";
 import { watermarkAndDownscale } from "@/lib/watermark";
 import crypto from "crypto";
 import { readFile } from "fs/promises";
@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const photoFile = formData.get("photo") as File;
     const presetId = formData.get("presetId") as string;
+    const isCartoon = formData.get("isCartoon") === "true";
 
     if (!photoFile || !presetId) {
       return NextResponse.json(
@@ -128,12 +129,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Get styled prompts based on user preference
+    const styledPrompts = getPresetPromptsWithStyle(presetId, isCartoon);
+
     // Generate content based on preset type
     if (isVideoPreset) {
       // Video generation: use first prompt only, generates 1 video
       const result = await generateVideo({
         baseImage: photoBase64,
-        prompt: preset.prompts[0],
+        prompt: styledPrompts[0],
       });
 
       // Note: Videos are already watermarked by Veo 3.1 using SynthID
@@ -150,7 +154,7 @@ export async function POST(req: NextRequest) {
       const result = await generateImages({
         baseImage: photoBase64,
         referenceImages,
-        prompts: preset.prompts,
+        prompts: styledPrompts,
         quality: "high",
       });
 

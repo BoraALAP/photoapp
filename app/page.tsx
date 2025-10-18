@@ -19,6 +19,7 @@ export default function Home() {
   const { isSignedIn, isLoaded } = useUser();
   const [selectedPreset, setSelectedPreset] = useState<string>("mapleAutumn");
   const [isMounted, setIsMounted] = useState(false);
+  const [isCartoonMode, setIsCartoonMode] = useState(false);
 
   // Mark component as mounted (client-side only)
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function Home() {
     canvasRef,
     stream,
     stopCamera,
-    onCapture: (file) => handleGenerate(file, selectedPreset),
+    onCapture: (file) => handleGenerate(file, selectedPreset, isCartoonMode),
   });
 
   // Auto-open sign-in dialog for unauthenticated users
@@ -78,7 +79,7 @@ export default function Home() {
 
   const handleGenerateClick = async () => {
     if (photo) {
-      await handleGenerate(photo, selectedPreset);
+      await handleGenerate(photo, selectedPreset, isCartoonMode);
     }
   };
 
@@ -127,9 +128,11 @@ export default function Home() {
         stream={stream}
         selectedPresetType={selectedPresetType}
         hasCredits={hasCredits}
+        isCartoonMode={isCartoonMode}
         onCapture={capturePhoto}
         onGenerate={handleGenerateClick}
         onPurchase={() => setShowPurchaseModal(true)}
+        onToggleCartoon={() => setIsCartoonMode(!isCartoonMode)}
       />
 
       {/* Purchase Modal */}
