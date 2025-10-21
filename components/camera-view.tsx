@@ -3,7 +3,7 @@
  *
  * Displays the camera feed or captured photo preview.
  * Shows the main video/photo frame with overlays for logo, user button, and presets.
- * Displays separate banners for image free credits and video free credits.
+ * Displays banner for image free credits when available.
  */
 
 "use client";
@@ -20,7 +20,6 @@ interface CameraViewProps {
   photoPreview: string | null;
   isSignedIn: boolean;
   freeCredits: number;
-  videoFreeCredits: number;
   selectedPreset: string;
   onPresetChange: (preset: string) => void;
   generating: boolean;
@@ -32,7 +31,6 @@ export function CameraView({
   photoPreview,
   isSignedIn,
   freeCredits,
-  videoFreeCredits,
   selectedPreset,
   onPresetChange,
   generating,
@@ -104,21 +102,13 @@ export function CameraView({
         </div>
       </div>
 
-      {/* Free Credits Banners */}
-      {isSignedIn && (freeCredits > 0 || videoFreeCredits > 0) && (
-        <div className="absolute bottom-20 left-0 right-0 flex justify-center gap-2 px-6">
-          {freeCredits > 0 && (
-            <div className="bg-green-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-xs font-medium">
-              🎉 {freeCredits} free {freeCredits === 1 ? "image credit" : "image credits"}{" "}
-              remaining
-            </div>
-          )}
-          {videoFreeCredits > 0 && (
-            <div className="bg-purple-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-xs font-medium">
-              🎬 {videoFreeCredits} free {videoFreeCredits === 1 ? "video credit" : "video credits"}{" "}
-              remaining
-            </div>
-          )}
+      {/* Free Credits Banner */}
+      {isSignedIn && freeCredits > 0 && (
+        <div className="absolute bottom-20 left-0 right-0 flex justify-center px-6">
+          <div className="bg-green-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-xs font-medium">
+            🎉 {freeCredits} free {freeCredits === 1 ? "image credit" : "image credits"}{" "}
+            remaining
+          </div>
         </div>
       )}
 

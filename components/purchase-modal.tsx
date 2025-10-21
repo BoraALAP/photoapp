@@ -18,24 +18,11 @@ interface PurchaseModalProps {
 }
 
 export function PurchaseModal({ onClose, onPurchaseComplete, defaultCreditType = 'image' }: PurchaseModalProps) {
-  const [selectedTab, setSelectedTab] = useState<'image' | 'video'>(defaultCreditType);
+  const imageOptions = PRICING_OPTIONS.filter(opt => opt.creditType === 'image');
   const [selectedOption, setSelectedOption] = useState(
-    PRICING_OPTIONS.find(opt => opt.creditType === defaultCreditType)?.id || PRICING_OPTIONS[0].id
+    imageOptions[0]?.id || PRICING_OPTIONS[0].id
   );
   const [loading, setLoading] = useState(false);
-
-  const imageOptions = PRICING_OPTIONS.filter(opt => opt.creditType === 'image');
-  const videoOptions = PRICING_OPTIONS.filter(opt => opt.creditType === 'video');
-  const currentOptions = selectedTab === 'image' ? imageOptions : videoOptions;
-
-  const handleTabChange = (tab: 'image' | 'video') => {
-    setSelectedTab(tab);
-    // Set selected option to first option of the new tab
-    const newOptions = tab === 'image' ? imageOptions : videoOptions;
-    if (newOptions.length > 0) {
-      setSelectedOption(newOptions[0].id);
-    }
-  };
 
   const handlePurchase = async () => {
     const option = PRICING_OPTIONS.find((o) => o.id === selectedOption);
@@ -85,47 +72,19 @@ export function PurchaseModal({ onClose, onPurchaseComplete, defaultCreditType =
           <Logo size={72} />
         </div>
 
-        {/* Tab Buttons */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleTabChange('image')}
-            className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-colors ${
-              selectedTab === 'image'
-                ? 'bg-black text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            Image Credits
-          </button>
-          <button
-            onClick={() => handleTabChange('video')}
-            className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-colors ${
-              selectedTab === 'video'
-                ? 'bg-black text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            Video Credits
-          </button>
-        </div>
-
         {/* Title */}
         <div className="text-center space-y-2">
           <h2 className="text-lg font-semibold text-black">
-            {selectedTab === 'image'
-              ? 'Generate as many images as you like'
-              : 'Generate as many videos as you like'}
+            Generate as many images as you like
           </h2>
           <p className="text-sm text-gray-600">
-            {selectedTab === 'image'
-              ? 'Each generation gives you 4 image alternatives'
-              : 'Each generation creates 1 video (8 seconds)'}
+            Each generation gives you 4 image alternatives
           </p>
         </div>
 
         {/* Pricing Options */}
         <div className="flex flex-col gap-2">
-          {currentOptions.map((option) => (
+          {imageOptions.map((option) => (
             <button
               key={option.id}
               onClick={() => setSelectedOption(option.id)}

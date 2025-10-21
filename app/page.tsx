@@ -114,7 +114,6 @@ export default function Home() {
         photoPreview={photoPreview}
         isSignedIn={isSignedIn || false}
         freeCredits={freeCredits}
-        videoFreeCredits={videoFreeCredits}
         selectedPreset={selectedPreset}
         onPresetChange={setSelectedPreset}
         generating={generating}

@@ -150,7 +150,7 @@ export const PRESETS: Record<string, Preset> = {
   },
   withus: {
     id: "withus",
-    name: "With Us",
+    name: "With Eray and Evren",
     description: "User appears with two reference hosts in Canadian settings",
     requiresRefs: true,
     type: 'image',
@@ -161,27 +161,27 @@ export const PRESETS: Record<string, Preset> = {
       `${genericStyle}. Generate a dynamic and creative group photo with three people experiencing Canada from a unique perspective. Use natural lighting and interesting angles. Incorporate diverse Canadian settings - wilderness, cities, landmarks, or cultural spots. Make each image distinctly different with varied moods - adventurous, relaxed, joyful, or contemplative while keeping realistic proportions.`,
     ],
   },
-  ilacSceneMatch: {
-    id: "ilacSceneMatch",
-    name: "ILAC Campus (Toronto)",
-    description: "Places the person naturally into ILAC Toronto school interiors: lobby, corridors, and themed halls.",
-    requiresRefs: true, // expects the 4 ILAC photos as reference backgrounds
-    rainbowBorder: true,
-    type: 'image',
-    prompts: [
-      // 1. Lobby with ILAC branding and colorful seating
-      `${genericStyle}. Use the ILAC LOBBY background plate (colorful couches, blue walls, ILAC logo columns). Place the person casually standing or sitting within the lobby area, well-integrated with reflections on the floor. Match warm indoor lighting and soft ceiling lights; maintain perspective and correct shadowing on the floor; keep ILAC signage visible and crisp.`,
-      // 2. "The 6" hallway area
-      `${genericStyle}. Use the ILAC HALLWAY background plate with 'THE 6' installation. Position the person walking or leaning near the glass or doorway; align body angle with corridor lines; match warm indoor light temperature and gentle shadow under feet; preserve clean reflections on shiny surfaces.`,
-      // 3. Curved wall with world map graphic
-      `${genericStyle}. Use the ILAC WORLD MAP corridor plate. Place the person walking along or pointing toward the world map, aligning posture to the curve of the wall; match even overhead lighting and natural skin tones; add a faint contact shadow on the polished floor; keep map text clearly visible.`,
-      // 4. LOVE hallway with art and geometric lights
-      `${genericStyle}. Use the ILAC LOVE HALLWAY plate. Place the person mid-hall or near the mosaic artwork; match warm light tones and perspective depth; cast a natural soft floor shadow; maintain balanced exposure and realistic scale; ensure colorful artwork remains unobstructed.`,
-    ],
-  },
+  // ilacSceneMatch: {
+  //   id: "ilacSceneMatch",
+  //   name: "ILAC Campus (Toronto)",
+  //   description: "Places the person naturally into ILAC Toronto school interiors: lobby, corridors, and themed halls.",
+  //   requiresRefs: true, // expects the 4 ILAC photos as reference backgrounds
+  //   rainbowBorder: true,
+  //   type: 'image',
+  //   prompts: [
+  //     // 1. Lobby with ILAC branding and colorful seating
+  //     `${genericStyle}. Use the ILAC LOBBY background plate (colorful couches, blue walls, ILAC logo columns). Place the person casually standing or sitting within the lobby area, well-integrated with reflections on the floor. Match warm indoor lighting and soft ceiling lights; maintain perspective and correct shadowing on the floor; keep ILAC signage visible and crisp.`,
+  //     // 2. "The 6" hallway area
+  //     `${genericStyle}. Use the ILAC HALLWAY background plate with 'THE 6' installation. Position the person walking or leaning near the glass or doorway; align body angle with corridor lines; match warm indoor light temperature and gentle shadow under feet; preserve clean reflections on shiny surfaces.`,
+  //     // 3. Curved wall with world map graphic
+  //     `${genericStyle}. Use the ILAC WORLD MAP corridor plate. Place the person walking along or pointing toward the world map, aligning posture to the curve of the wall; match even overhead lighting and natural skin tones; add a faint contact shadow on the polished floor; keep map text clearly visible.`,
+  //     // 4. LOVE hallway with art and geometric lights
+  //     `${genericStyle}. Use the ILAC LOVE HALLWAY plate. Place the person mid-hall or near the mosaic artwork; match warm light tones and perspective depth; cast a natural soft floor shadow; maintain balanced exposure and realistic scale; ensure colorful artwork remains unobstructed.`,
+  //   ],
+  // },
 };
 
-export const PRESET_ORDER = ["mapleAutumn", "winterWonderland", "northernLights", "cottageLife", "urbanCanada", "ilacSceneMatch","wildernessExplorer", "editorialCanada", "canadianWildlifeParty", "ehEdition", "withus"];
+export const PRESET_ORDER = ["mapleAutumn", "winterWonderland", "northernLights", "cottageLife", "urbanCanada", "wildernessExplorer", "editorialCanada", "canadianWildlifeParty", "ehEdition", "withus"];
 
 export function getPreset(id: string): Preset | undefined {
   return PRESETS[id];

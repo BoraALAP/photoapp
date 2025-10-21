@@ -62,11 +62,11 @@ export async function getOrCreateStripeCustomer(
     return existing.data[0];
   }
 
-  // Create new customer with 5 image free credits and 2 video free credits
+  // Create new customer with 1 image free credit and 2 video free credits
   return await stripe.customers.create({
     email,
     metadata: {
-      free_credits: "5",
+      free_credits: "1",
       image_credits: "0",
       video_credits: "0",
       video_free_credits: "2",
